@@ -53,7 +53,7 @@ fun DoctorCardHorizontal(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -61,19 +61,19 @@ fun DoctorCardHorizontal(
                 contentDescription = doctor.name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(90.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
             )
 
             Spacer(modifier = Modifier.width(14.dp))
             Column(
-                modifier = Modifier.weight(0.5f)
+                modifier = Modifier.weight(0.4f)
             ) {
                 Text(
                     text = doctor.name,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface
@@ -103,12 +103,12 @@ fun DoctorCardHorizontal(
                             imageVector = Icons.Filled.Star,
                             contentDescription = "Rating",
                             tint = Color(0xFFFFC107),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "${doctor.rating} (${doctor.reviews} reviews)",
-                            fontSize = 14.sp,
+                            fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

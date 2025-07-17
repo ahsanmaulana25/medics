@@ -23,7 +23,10 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +47,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,6 +67,8 @@ fun ProfileScreen(
 
     var showDevelopmentDialog by remember { mutableStateOf(false) }
     val developmentMessage = "Fitur ini masih dalam tahap pengembangan."
+
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -184,7 +190,7 @@ fun ProfileScreen(
                     iconBackground = logoutRed.copy(alpha = 0.15f),
                     text = "Logout",
                     textColor = logoutRed,
-                    onClick = onLogoutClicked
+                    onClick = { showLogoutDialog = true }
                 )
             }
         }
@@ -200,6 +206,75 @@ fun ProfileScreen(
                     Text("OK")
                 }
             }
+        )
+    }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = Color.White,
+            title = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFE0F3EF)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Logout,
+                            contentDescription = "Logout Icon",
+                            tint = Color(0xFF4CB29E),
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Are you sure to log out of your account?",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            showLogoutDialog = false
+                            onLogoutClicked()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF008080)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Log Out", color = Color.White, fontSize = 16.sp)
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(
+                        onClick = { showLogoutDialog = false },
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Cancel", color = Color.Gray, fontSize = 16.sp)
+                    }
+                }
+            },
+            dismissButton = { }
         )
     }
 }
@@ -269,6 +344,6 @@ fun MenuItem(
 fun ProfileScreenPreview() {
     ProfileScreen(
         painter = painterResource(R.drawable.profile_amelia_renata),
-        onLogoutClicked = {}
+        onLogoutClicked = { }
     )
 }

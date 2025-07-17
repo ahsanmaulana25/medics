@@ -18,9 +18,6 @@ fun TopDoctorsList(
     onDoctorCardClicked: (doctorId: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (doctors.isEmpty()) {
-        return
-    }
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(start = 12.dp, end = 16.dp),

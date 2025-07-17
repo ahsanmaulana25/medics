@@ -41,7 +41,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1" // Sesuaikan dengan versi Compose Compiler Anda
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -51,32 +51,19 @@ android {
 }
 
 dependencies {
-    // Core KTX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
-    // Compose
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-
-    // Compose - Icons
     implementation("androidx.compose.material:material-icons-core:1.7.0-beta01")
     implementation("androidx.compose.material:material-icons-extended:1.7.0-beta01")
-
-    // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.6.0")
-
-    // Lifecycle for ViewModel with Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
-
-    // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.7")
-
-    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,7 +71,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    // Kotlin Coroutines Test (penting untuk runTest di UI Tests)
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
 }

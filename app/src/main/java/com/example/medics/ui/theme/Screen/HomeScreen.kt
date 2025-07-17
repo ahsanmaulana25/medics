@@ -75,6 +75,7 @@ import com.example.medics.ui.theme.Screen.ScheduleScreen
 import com.example.medics.ui.theme.komponen.HomeBottomNavigationBar
 import com.example.medics.ui.theme.komponen.TopDoctorsList
 
+
 data class HealthArticle(
     val id: String,
     val title: String,
@@ -101,7 +102,12 @@ fun HomeScreen(
     onSeeAllDoctorsClicked: () -> Unit,
     onBottomNavItemClicked: (route: String) -> Unit,
     onNavigateToChatScreen: (conversationId: String) -> Unit,
-    onArticleClicked: (articleId: String) -> Unit
+    onArticleClicked: (articleId: String) -> Unit,
+    onPharmacyShortcutClicked: () -> Unit,
+    onHospitalShortcutClicked: () -> Unit,
+    onAmbulanceShortcutClicked: () -> Unit,
+    onSeeAllArticlesClicked: () -> Unit,
+    onLearnMoreClicked: () -> Unit
 ) {
     var selectedBottomNavRoute by remember { mutableStateOf(BottomNavItem.Home.route) }
     val bottomNavItems = listOf(
@@ -114,7 +120,8 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             if (selectedBottomNavRoute == BottomNavItem.Home.route) {
-                HomeTopAppBar()
+                HomeTopAppBar(
+                )
             } else if (selectedBottomNavRoute == BottomNavItem.Messages.route) {
                 MessagesTopAppBar()
             } else if (selectedBottomNavRoute == BottomNavItem.Schedule.route) {
@@ -155,7 +162,12 @@ fun HomeScreen(
                     onSearchQueryChanged = onSearchQueryChanged,
                     onDoctorCardClicked = onDoctorCardClicked,
                     onSeeAllDoctorsClicked = onSeeAllDoctorsClicked,
-                    onArticleClicked = onArticleClicked
+                    onArticleClicked = onArticleClicked,
+                    onPharmacyShortcutClicked = onPharmacyShortcutClicked,
+                    onHospitalShortcutClicked = onHospitalShortcutClicked,
+                    onAmbulanceShortcutClicked = onAmbulanceShortcutClicked,
+                    onSeeAllArticlesClicked = onSeeAllArticlesClicked,
+                    onLearnMoreClicked = onLearnMoreClicked
                 )
                 BottomNavItem.Messages.route -> MessagesScreen(
                     onNavigateToChat = onNavigateToChatScreen
@@ -184,8 +196,7 @@ fun HomeTopAppBar(
         },
         actions = {
             IconButton(
-                onClick = { showDevelopmentDialog = true }
-            ) {
+                onClick = {showDevelopmentDialog = true}) {
                 Icon(Icons.Filled.NotificationsNone, contentDescription = "Notifications")
             }
         },
@@ -202,8 +213,7 @@ fun HomeTopAppBar(
             text = { Text(text = developmentMessage) },
             confirmButton = {
                 TextButton(
-                    onClick = { showDevelopmentDialog = false }
-                ) {
+                    onClick = { showDevelopmentDialog = false }) {
                     Text("OK")
                 }
             }
@@ -292,7 +302,12 @@ fun HomeContent(
     onSearchQueryChanged: (String) -> Unit,
     onDoctorCardClicked: (doctorId: String) -> Unit,
     onSeeAllDoctorsClicked: () -> Unit,
-    onArticleClicked: (articleId: String) -> Unit
+    onArticleClicked: (articleId: String) -> Unit,
+    onPharmacyShortcutClicked: () -> Unit,
+    onHospitalShortcutClicked: () -> Unit,
+    onAmbulanceShortcutClicked: () -> Unit,
+    onSeeAllArticlesClicked: () -> Unit,
+    onLearnMoreClicked: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     var searchQuery by remember { mutableStateOf("") }
@@ -354,7 +369,7 @@ fun HomeContent(
         modifier = Modifier
             .verticalScroll(scrollState)
             .fillMaxSize()
-            .padding(top = 16.dp)
+            .padding(top = 16.dp),
     ) {
         OutlinedTextField(
             value = searchQuery,
@@ -368,7 +383,7 @@ fun HomeContent(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp),
-            shape = CircleShape
+            shape = CircleShape,
         )
 
         Row(
@@ -377,26 +392,14 @@ fun HomeContent(
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            ShortcutItem(
-                name = "Doctor",
-                iconRes = R.drawable.icon_doctor,
-                onClick = onSeeAllDoctorsClicked
-            )
-            ShortcutItem(
-                name = "Pharmacy",
-                iconRes = R.drawable.icon_pharmacy,
-                onClick = { showDevelopmentDialog = true }
-            )
-            ShortcutItem(
-                name = "Hospital",
-                iconRes = R.drawable.icon_hospital,
-                onClick = { showDevelopmentDialog = true }
-            )
-            ShortcutItem(
-                name = "Ambulance",
-                iconRes = R.drawable.icon_ambulance,
-                onClick = { showDevelopmentDialog = true }
-            )
+            ShortcutItem("Doctor", R.drawable.icon_doctor,
+                onClick = onSeeAllDoctorsClicked)
+            ShortcutItem("Pharmacy", R.drawable.icon_pharmacy,
+                onClick = onPharmacyShortcutClicked)
+            ShortcutItem("Hospital", R.drawable.icon_hospital,
+                onClick = onHospitalShortcutClicked)
+            ShortcutItem("Ambulance", R.drawable.icon_ambulance,
+                onClick = onAmbulanceShortcutClicked)
         }
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -405,7 +408,7 @@ fun HomeContent(
                 .fillMaxWidth()
                 .height(150.dp)
                 .padding(horizontal = 16.dp)
-                .clickable { showDevelopmentDialog = true },
+                .clickable { onLearnMoreClicked() },
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Color(0xFFE0F2F1))
         ) {
@@ -435,7 +438,7 @@ fun HomeContent(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Button(
-                        onClick = { showDevelopmentDialog = true },
+                        onClick = onLearnMoreClicked,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF008080),
                             contentColor = Color.White
@@ -458,7 +461,8 @@ fun HomeContent(
         }
         Spacer(modifier = Modifier.height(24.dp))
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth())
+        {
             SectionHeader(
                 title = "Top Doctors",
                 onSeeAllClicked = onSeeAllDoctorsClicked
@@ -474,8 +478,7 @@ fun HomeContent(
         Column(modifier = Modifier.fillMaxWidth()) {
             SectionHeader(
                 title = "Health Articles",
-                onSeeAllClicked = { showDevelopmentDialog = true }
-            )
+                onSeeAllClicked = onSeeAllArticlesClicked)
             Spacer(modifier = Modifier.height(12.dp))
             HealthArticlesList(
                 articles = sampleHealthArticles,
@@ -491,8 +494,7 @@ fun HomeContent(
             text = { Text(text = developmentMessage) },
             confirmButton = {
                 TextButton(
-                    onClick = { showDevelopmentDialog = false }
-                ) {
+                    onClick = { showDevelopmentDialog = false }) {
                     Text("OK")
                 }
             }
@@ -592,8 +594,7 @@ fun HealthArticlesList(
 fun ShortcutItem(
     name: String,
     iconRes: Int,
-    onClick: () -> Unit
-) {
+    onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable(onClick = onClick)
@@ -627,6 +628,11 @@ fun HomeScreenPreview() {
         },
         onArticleClicked = { articleId ->
             println("Preview: Navigate to article with ID: $articleId")
-        }
+        },
+        onPharmacyShortcutClicked = {},
+        onHospitalShortcutClicked = {},
+        onAmbulanceShortcutClicked = {},
+        onSeeAllArticlesClicked = {},
+        onLearnMoreClicked = {}
     )
 }
