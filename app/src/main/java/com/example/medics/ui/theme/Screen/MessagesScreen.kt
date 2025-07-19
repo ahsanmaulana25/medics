@@ -45,7 +45,7 @@ data class ChatConversation(
 
 @Composable
 fun MessagesScreen(
-    onNavigateToChat: (conversationId: String) -> Unit
+    onNavigateToChat: (conversationId: String, chatPartnerName: String, chatPartnerImageRes: Int) -> Unit
 ) {
     val sampleConversations = remember {
         listOf(
@@ -95,13 +95,14 @@ fun MessagesScreen(
         }
     } else {
         LazyColumn(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
         ) {
             items(sampleConversations) { conversation ->
                 ConversationItem(
                     conversation = conversation,
                     onClick = {
-                        onNavigateToChat(conversation.id)
+                        onNavigateToChat(conversation.id, conversation.doctorName, conversation.doctorProfileImageRes)
                         println("Clicked on conversation with ${conversation.doctorName}")
                     }
                 )
@@ -184,8 +185,8 @@ fun ConversationItem(
 @Composable
 fun MessagesScreenPreview() {
     MessagesScreen(
-        onNavigateToChat = { conversationId ->
-            println("Preview: Navigate to chat with ID: $conversationId")
+        onNavigateToChat = { conversationId, chatPartnerName, chatPartnerImageRes ->
+            println("Preview: Navigate to chat with ID: $conversationId, Name: $chatPartnerName, Image: $chatPartnerImageRes")
         }
     )
 }

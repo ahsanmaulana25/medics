@@ -41,7 +41,6 @@ fun LoginOrSignUpScreen(
             modifier = Modifier
                 .fillMaxWidth(0.45f)
                 .aspectRatio(0.6f)
-                //.padding(bottom = 0.dp)
         )
 
         Text(

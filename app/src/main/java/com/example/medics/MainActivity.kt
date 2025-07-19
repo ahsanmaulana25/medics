@@ -2,7 +2,6 @@ package com.example.medics
 
 import android.content.Intent
 import android.net.Uri
-import com.example.medics.ui.theme.Screen.SignUpScreen
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -14,21 +13,33 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.medics.model.Doctor
 import com.example.medics.ui.screens.HomeScreen
 import com.example.medics.ui.theme.AppDestinations
+import com.example.medics.ui.theme.Screen.BookingScreen
+import com.example.medics.ui.theme.Screen.ChatScreen
+import com.example.medics.ui.theme.Screen.DoctorDetailScreen
 import com.example.medics.ui.theme.Screen.LoginOrSignUpScreen
 import com.example.medics.ui.theme.Screen.LoginScreen
+import com.example.medics.ui.theme.Screen.MessagesScreen
 import com.example.medics.ui.theme.Screen.OnboardingScreen
 import com.example.medics.ui.theme.Screen.PharmacyScreen
+import com.example.medics.ui.theme.Screen.ProfileScreen
+import com.example.medics.ui.theme.Screen.ScheduleScreen
+import com.example.medics.ui.theme.Screen.SignUpScreen
 import com.example.medics.ui.theme.Screen.SplashScreen
 import com.example.medics.ui.theme.Screen.TopDoctorsScreen
-import com.example.medics.ui.theme.Screen.DoctorDetailScreen
+import com.google.gson.Gson
+import java.net.URLDecoder
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -154,15 +165,21 @@ fun MedicsApp() {
                 onSeeAllDoctorsClicked = { navController.navigate(AppDestinations.TOP_DOCTORS_SCREEN_ROUTE) },
                 onBottomNavItemClicked = { route ->
                 },
-                onNavigateToChatScreen = { conversationId ->
-                    println("Navigate to chat screen with ID: $conversationId from MedicsApp")
+                onNavigateToChatScreen = { conversationId, chatPartnerName, chatPartnerImageRes ->
+                    val encodedChatPartnerName = URLEncoder.encode(chatPartnerName, StandardCharsets.UTF_8.toString())
+                    navController.navigate(
+                        "${AppDestinations.CHAT_SCREEN_ROUTE}/" +
+                                "$conversationId/" +
+                                "$encodedChatPartnerName/" +
+                                "$chatPartnerImageRes"
+                    )
                 },
                 onArticleClicked = { articleId ->
                     println("Article clicked: $articleId")
                 },
                 onPharmacyShortcutClicked = { navController.navigate(AppDestinations.PHARMACY_SCREEN_ROUTE) },
                 onHospitalShortcutClicked = {
-                    val gmmIntentUri = Uri.parse("geo:0,0?q=hospitals")
+                    val gmmIntentUri = Uri.parse("geo:0,0?q=hospital")
                     val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                     mapIntent.setPackage("com.google.android.apps.maps")
 
@@ -174,25 +191,15 @@ fun MedicsApp() {
                     }
                 },
                 onAmbulanceShortcutClicked = {
-                    val phoneNumber = "6285142947225"
-                    val whatsappUrl = "https://wa.me/$phoneNumber"
-                    val whatsappIntent = Intent(Intent.ACTION_VIEW)
-                    whatsappIntent.data = Uri.parse(whatsappUrl)
-                    whatsappIntent.setPackage("com.whatsapp")
+                    val phoneNumber = "112"
+                    val whatsappUri = Uri.parse("tel:$phoneNumber")
+                    val callIntent = Intent(Intent.ACTION_DIAL, whatsappUri)
 
                     try {
-                        context.startActivity(whatsappIntent)
-                        Toast.makeText(context, "Membuka WhatsApp...", Toast.LENGTH_SHORT).show()
+                        context.startActivity(callIntent)
                     } catch (e: Exception) {
-                        Toast.makeText(context, "WhatsApp tidak terinstal atau tidak dapat dibuka. Mencoba panggilan telepon biasa.", Toast.LENGTH_LONG).show()
-                        val dialIntent = Intent(Intent.ACTION_DIAL)
-                        dialIntent.data = Uri.parse("tel:$phoneNumber")
-                        try {
-                            context.startActivity(dialIntent)
-                        } catch (e2: Exception) {
-                            Toast.makeText(context, "Tidak dapat melakukan panggilan. Pastikan aplikasi telepon berfungsi.", Toast.LENGTH_LONG).show()
-                            println("Error: Tidak dapat melakukan panggilan. ${e2.message}")
-                        }
+                        Toast.makeText(context, "Tidak dapat melakukan panggilan. Pastikan aplikasi telepon berfungsi.", Toast.LENGTH_LONG).show()
+                        println("Error: Tidak dapat melakukan panggilan. Pastikan aplikasi telepon berfungsi. ${e.message}")
                     }
                 },
                 onSeeAllArticlesClicked = {
@@ -243,15 +250,127 @@ fun MedicsApp() {
             arguments = listOf(navArgument("doctorId") { type = NavType.StringType })
         ) { backStackEntry ->
             val doctorId = backStackEntry.arguments?.getString("doctorId")
+            val doctor = remember(doctorId) {
+                when (doctorId) {
+                    "doc1" -> Doctor("doc1", "Dr. Marcus Horizon", "Cardiologist", R.drawable.marcus, "City General Hospital", 4.8f, 230)
+                    "doc2" -> Doctor("doc2", "Dr. Maria Elena", "Skin Specialist", R.drawable.maria, "Metro Hospital", 4.5f, 98)
+                    "doc3" -> Doctor("doc3", "Dr. Stevi Jessi", "Heart Specialist", R.drawable.stefi, "Hope Clinic", 4.9f, 210)
+                    else -> Doctor("dummy", "Dr. Dummy Dokter", "General Practitioner", R.drawable.dr_marcus_horizon, "Dummy Clinic", 4.0f, 50)
+                }
+            }
             DoctorDetailScreen(
                 doctorId = doctorId,
                 onNavigateBack = { navController.popBackStack() },
-                onBookAppointmentClicked = { docId, selectedDate, selectedTime ->
-                    println("Booking appointment for doctor $docId on $selectedDate at $selectedTime")
-                    Toast.makeText(context, "Janji temu dengan $docId pada $selectedDate pukul $selectedTime berhasil dipesan!", Toast.LENGTH_LONG).show()
+                onBookAppointmentClicked = { doc, selectedDate, selectedTime ->
+                    val doctorJson = Gson().toJson(doc)
+                    val encodedDoctorJson = URLEncoder.encode(doctorJson, StandardCharsets.UTF_8.toString())
+
+                    navController.navigate("${AppDestinations.BOOKING_SCREEN_ROUTE}/$encodedDoctorJson/$selectedDate/$selectedTime")
                 },
                 onChatClicked = { docId ->
                     println("Chat with doctor $docId clicked from detail screen")
+                }
+            )
+        }
+
+        composable(
+            route = "${AppDestinations.BOOKING_SCREEN_ROUTE}/{doctorJson}/{selectedDate}/{selectedTime}",
+            arguments = listOf(
+                navArgument("doctorJson") { type = NavType.StringType },
+                navArgument("selectedDate") { type = NavType.StringType },
+                navArgument("selectedTime") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val doctorJson = backStackEntry.arguments?.getString("doctorJson")
+            val selectedDate = backStackEntry.arguments?.getString("selectedDate") ?: ""
+            val selectedTime = backStackEntry.arguments?.getString("selectedTime") ?: ""
+
+            val decodedDoctorJson = doctorJson?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            } ?: "{}"
+
+            val doctor = Gson().fromJson(decodedDoctorJson, Doctor::class.java)
+
+            BookingScreen(
+                doctor = doctor,
+                selectedDate = selectedDate,
+                selectedTime = selectedTime,
+                onNavigateBack = { navController.popBackStack() },
+                onBookingConfirmed = { doc ->
+                    Toast.makeText(context, "Booking Berhasil Dikonfirmasi!", Toast.LENGTH_LONG).show()
+                    navController.popBackStack(AppDestinations.HOME_ROOT_ROUTE, inclusive = false)
+                },
+                onChangeDateClicked = {
+                    navController.popBackStack()
+                },
+                onChangeReasonClicked = {
+                    Toast.makeText(context, "Fitur ubah alasan masih dalam pengembangan.", Toast.LENGTH_SHORT).show()
+                },
+                onChangePaymentMethodClicked = {
+                    Toast.makeText(context, "Fitur ubah metode pembayaran masih dalam pengembangan.", Toast.LENGTH_SHORT).show()
+                },
+                onChatDoctorClicked = { doctorId, chatPartnerName, chatPartnerImageRes ->
+                    val encodedChatPartnerName = URLEncoder.encode(chatPartnerName, StandardCharsets.UTF_8.toString())
+                    navController.navigate(
+                        "${AppDestinations.CHAT_SCREEN_ROUTE}/" +
+                                "$doctorId/" +
+                                "$encodedChatPartnerName/" +
+                                "$chatPartnerImageRes"
+                    )
+                }
+            )
+        }
+
+        composable(
+            route = "${AppDestinations.CHAT_SCREEN_ROUTE}/{chatPartnerId}/{chatPartnerName}/{chatPartnerImageRes}",
+            arguments = listOf(
+                navArgument("chatPartnerId") { type = NavType.StringType },
+                navArgument("chatPartnerName") { type = NavType.StringType },
+                navArgument("chatPartnerImageRes") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val chatPartnerId = backStackEntry.arguments?.getString("chatPartnerId")
+            val chatPartnerName = backStackEntry.arguments?.getString("chatPartnerName")
+            val chatPartnerImageRes = backStackEntry.arguments?.getInt("chatPartnerImageRes")
+
+            ChatScreen(
+                chatPartnerId = chatPartnerId,
+                chatPartnerName = chatPartnerName,
+                chatPartnerImageRes = chatPartnerImageRes,
+                onNavigateBack = { navController.popBackStack() },
+                onVideoCallClicked = { Toast.makeText(context, "Video Call feature in development", Toast.LENGTH_SHORT).show() },
+                onVoiceCallClicked = { Toast.makeText(context, "Voice Call feature in development", Toast.LENGTH_SHORT).show() }
+            )
+        }
+
+        composable(AppDestinations.MESSAGES_SCREEN_ROUTE) {
+            MessagesScreen(
+                onNavigateToChat = { conversationId, chatPartnerName, chatPartnerImageRes ->
+                    val encodedChatPartnerName = URLEncoder.encode(chatPartnerName, StandardCharsets.UTF_8.toString())
+                    navController.navigate(
+                        "${AppDestinations.CHAT_SCREEN_ROUTE}/" +
+                                "$conversationId/" +
+                                "$encodedChatPartnerName/" +
+                                "$chatPartnerImageRes"
+                    )
+                }
+            )
+        }
+
+        composable(AppDestinations.SCHEDULE_SCREEN_ROUTE) {
+            ScheduleScreen()
+        }
+
+        composable(AppDestinations.PROFILE_SCREEN_ROUTE) {
+            ProfileScreen(
+                painter = painterResource(R.drawable.profile_amelia_renata),
+                onLogoutClicked = {
+                    loggedInUserName = null
+                    loggedInUserEmail = null
+                    navController.navigate(AppDestinations.LOGIN_SIGNUP_ROUTE) {
+                        popUpTo(AppDestinations.HOME_ROOT_ROUTE) { inclusive = true }
+                    }
+                    println("Logout berhasil dari Profile!")
                 }
             )
         }

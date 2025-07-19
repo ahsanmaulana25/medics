@@ -101,7 +101,7 @@ fun HomeScreen(
     onDoctorCardClicked: (doctorId: String) -> Unit,
     onSeeAllDoctorsClicked: () -> Unit,
     onBottomNavItemClicked: (route: String) -> Unit,
-    onNavigateToChatScreen: (conversationId: String) -> Unit,
+    onNavigateToChatScreen: (conversationId: String, chatPartnerName: String, chatPartnerImageRes: Int) -> Unit,
     onArticleClicked: (articleId: String) -> Unit,
     onPharmacyShortcutClicked: () -> Unit,
     onHospitalShortcutClicked: () -> Unit,
@@ -623,12 +623,10 @@ fun HomeScreenPreview() {
         onDoctorCardClicked = {},
         onSeeAllDoctorsClicked = {},
         onBottomNavItemClicked = {},
-        onNavigateToChatScreen = { conversationId ->
-            println("Preview: Navigate to chat with ID: $conversationId")
+        onNavigateToChatScreen = { conversationId, chatPartnerName, chatPartnerImageRes ->
+            println("Preview: Navigate to chat with ID: $conversationId, Name: $chatPartnerName, Image: $chatPartnerImageRes")
         },
-        onArticleClicked = { articleId ->
-            println("Preview: Navigate to article with ID: $articleId")
-        },
+        onArticleClicked = {},
         onPharmacyShortcutClicked = {},
         onHospitalShortcutClicked = {},
         onAmbulanceShortcutClicked = {},
